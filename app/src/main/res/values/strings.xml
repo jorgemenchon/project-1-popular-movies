@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="activity_detail_name">Movie Detail</string>
+    <string name="error_message">An error has occurred. Test your connection.</string>
+    <string name="action_popular">Most Popular</string>
+    <string name="action_rated">Top Rated</string>
+    <string name="test_text">Test text</string>
+</resources>

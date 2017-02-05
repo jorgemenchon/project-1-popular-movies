@@ -1,0 +1,1 @@
+Please, go to file: popularmoviesjmenchon.util.GeneralUtils, and fill the variable: API_KEY, with a correct key.
