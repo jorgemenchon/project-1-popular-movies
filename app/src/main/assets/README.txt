@@ -1,1 +1,1 @@
-Please, go to file: popularmoviesjmenchon.util.GeneralUtils, and fill the variable: API_KEY, with a correct key.
+Please, go to file: gradle.properties, and fill the variable: MyMovieDbApiKey with a correct key.

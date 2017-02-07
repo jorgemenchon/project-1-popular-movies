@@ -6,9 +6,6 @@ package com.example.android.popularmoviesjmenchon.util;
 
 public class GeneralUtils {
 
-    //TODO Put your api key here!
-    public static final String API_KEY = "XXX";
-
     public static final String INTENTS_MOVIE = "intentsMovie";
     public static final String AVERAGE_TOTAL = "/10";
     public static final Integer POSTER_WIDTH = 500;

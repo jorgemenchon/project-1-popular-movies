@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,13 +16,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.popularmoviesjmenchon.adapter.ListItemClickListener;
+import com.example.android.popularmoviesjmenchon.aynctasks.AsyncTaskCompleteListener;
+import com.example.android.popularmoviesjmenchon.aynctasks.FetchMoviesInfo;
 import com.example.android.popularmoviesjmenchon.model.Movie;
 import com.example.android.popularmoviesjmenchon.adapter.MovieAdapter;
 import com.example.android.popularmoviesjmenchon.util.GeneralUtils;
-import com.example.android.popularmoviesjmenchon.util.MoviesDataJsonUtils;
 import com.example.android.popularmoviesjmenchon.util.NetworkUtils;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +42,6 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
         findComponents();
         loadMostPopularMoviesData();
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -70,7 +68,7 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
 
     private void loadMoviesData(String location) {
         if (isOnline()) {
-            FetchMoviesInfo fetcher = new FetchMoviesInfo();
+            FetchMoviesInfo fetcher = new FetchMoviesInfo(ListMovies.this, new FetchMoviesTaskCompleteListener());
             fetcher.execute(location);
         } else {
             showMessageError();
@@ -85,7 +83,6 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
         loadMoviesData(NetworkUtils.getPopularMoviesUrl());
     }
 
-
     @Override
     public void onListItemClick(Movie movie) {
         Log.d(TAG, "Click on movie: " + movie.getOriginalTitle());
@@ -95,7 +92,6 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
         intent.putExtra(GeneralUtils.INTENTS_MOVIE, movie);
         startActivity(intent);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -129,40 +125,14 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
         messageError.setVisibility(View.VISIBLE);
     }
 
-
-    // Asynchronous data
-    public class FetchMoviesInfo extends AsyncTask<String, Void, List<Movie>> {
-
+    public class FetchMoviesTaskCompleteListener implements AsyncTaskCompleteListener<List<Movie>>
+    {
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
+        public void onPreExecute() {
             showLoaderMovies();
         }
-
         @Override
-        protected List<Movie> doInBackground(String... params) {
-            if (params.length == 0) {
-                return null;
-            }
-            String location = params[0];
-            URL buildRequestUrl = NetworkUtils.buildUrl(location);
-            try {
-                String jsonMoviesResponse = NetworkUtils
-                        .getResponseFromHttpUrl(buildRequestUrl);
-
-                List<Movie> moviesData = MoviesDataJsonUtils
-                        .getMoviesFromJson(ListMovies.this, jsonMoviesResponse);
-                return moviesData;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e(TAG, "Error trying to access to the info.");
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> moviesData) {
+        public void onTaskComplete(List<Movie> moviesData) {
             if (moviesData != null && moviesData.size() > 0) {
                 showMoviesPosters();
                 movieAdapter.addAll(moviesData);

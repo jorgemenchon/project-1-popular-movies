@@ -2,6 +2,8 @@ package com.example.android.popularmoviesjmenchon.util;
 
 import android.net.Uri;
 
+import com.example.android.popularmoviesjmenchon.BuildConfig;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -27,7 +29,7 @@ public class NetworkUtils {
 
     public static URL buildUrl(String location) {
         Uri builtUri = Uri.parse(location).buildUpon()
-                .appendQueryParameter(API_PARAM, GeneralUtils.API_KEY)
+                .appendQueryParameter(API_PARAM, BuildConfig.API_KEY)
                 .build();
         URL url = null;
         try {
