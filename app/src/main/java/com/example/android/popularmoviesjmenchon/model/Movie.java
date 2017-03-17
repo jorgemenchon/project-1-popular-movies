@@ -43,12 +43,13 @@ public class Movie implements Parcelable {
         voteAverage = in.readString();
     }
 
-    public Movie(String posterPath, String originalTitle, String overview, String voteAverage, String releaseDate) {
+    public Movie(String posterPath, String originalTitle, String overview, String voteAverage, String releaseDate, String id) {
         this.posterPath = posterPath;
         this.originalTitle = originalTitle;
         this.overview = overview;
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
+        this.id = id;
     }
 
     @Override

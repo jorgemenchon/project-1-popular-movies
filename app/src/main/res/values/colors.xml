@@ -2,8 +2,13 @@
 <resources>
     <color name="colorPrimary">#000000</color>
     <color name="colorGrey">#F0FFFF</color>
+    <color name="colorGreyDark">#989898</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="colorTitle">#159688</color>
+    <color name="colorBackgroundTitle">#159688</color>
     <color name="colorTextTitle">#FFFFFF</color>
+    <color name="colorButton">#89E3DA</color>
+    <color name="colorGradientStart">#FFFFFF</color>
+    <color name="colorGradientEnd">#989898</color>
+
 </resources>

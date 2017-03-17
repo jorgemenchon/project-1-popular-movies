@@ -6,11 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <GridView
-        android:id="@+id/lv_movies"
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_movies"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:numColumns="2" />
+        android:layout_height="match_parent" />
+
 
     <TextView
         android:id="@+id/tv_message_error"
@@ -27,6 +28,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="invisible"/>
+        android:visibility="invisible" />
 
 </FrameLayout>

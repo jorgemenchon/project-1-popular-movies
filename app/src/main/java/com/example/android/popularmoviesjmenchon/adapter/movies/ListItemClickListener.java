@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesjmenchon.adapter;
+package com.example.android.popularmoviesjmenchon.adapter.movies;
 
 import com.example.android.popularmoviesjmenchon.model.Movie;
 

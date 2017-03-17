@@ -13,6 +13,6 @@
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:clickable="true"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop" />
 
 </LinearLayout>

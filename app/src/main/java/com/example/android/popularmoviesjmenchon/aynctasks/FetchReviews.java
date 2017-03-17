@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.android.popularmoviesjmenchon.ListMovies;
-import com.example.android.popularmoviesjmenchon.model.Movie;
+import com.example.android.popularmoviesjmenchon.model.Review;
+import com.example.android.popularmoviesjmenchon.model.Trailer;
 import com.example.android.popularmoviesjmenchon.util.MoviesDataJsonUtils;
 import com.example.android.popularmoviesjmenchon.util.NetworkUtils;
 
@@ -13,14 +13,14 @@ import java.net.URL;
 import java.util.List;
 
 
-public class FetchMoviesInfo extends AsyncTask<String, Void, List<Movie>> {
+public class FetchReviews extends AsyncTask<String, Void, List<Review>> {
 
-    private static final String TAG = FetchMoviesInfo.class.getSimpleName();
+    private static final String TAG = FetchReviews.class.getSimpleName();
 
     private Context context;
     private AsyncTaskCompleteListener listener;
 
-    public FetchMoviesInfo(Context context, AsyncTaskCompleteListener listener) {
+    public FetchReviews(Context context, AsyncTaskCompleteListener listener) {
         this.context = context;
         this.listener = listener;
     }
@@ -32,19 +32,19 @@ public class FetchMoviesInfo extends AsyncTask<String, Void, List<Movie>> {
     }
 
     @Override
-    protected List<Movie> doInBackground(String... params) {
+    protected List<Review> doInBackground(String... params) {
         if (params.length == 0) {
             return null;
         }
         String location = params[0];
         URL buildRequestUrl = NetworkUtils.buildUrl(location);
         try {
-            String jsonMoviesResponse = NetworkUtils
+            String jsonReviewsResponse = NetworkUtils
                     .getResponseFromHttpUrl(buildRequestUrl);
 
-            List<Movie> moviesData = MoviesDataJsonUtils
-                    .getMoviesFromJson(jsonMoviesResponse);
-            return moviesData;
+            List<Review> reviewsData = MoviesDataJsonUtils
+                    .getReviewsFromJson(jsonReviewsResponse);
+            return reviewsData;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,7 +54,7 @@ public class FetchMoviesInfo extends AsyncTask<String, Void, List<Movie>> {
     }
 
     @Override
-    protected void onPostExecute(List<Movie> moviesData) {
-        this.listener.onTaskComplete(moviesData);
+    protected void onPostExecute(List<Review> trailersData) {
+        this.listener.onTaskComplete(trailersData);
     }
 }

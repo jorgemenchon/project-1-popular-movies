@@ -5,14 +5,29 @@
     <!-- TEXT SIZES-->
     <dimen name="text_size_medium">20sp</dimen>
     <dimen name="text_size_small">16sp</dimen>
+    <dimen name="text_size_medium_large">25sp</dimen>
     <dimen name="text_size_large">30sp</dimen>
+    <dimen name="text_size_extra_small">8sp</dimen>
     <!-- MARGIN -->
     <dimen name="margin_medium">8dp</dimen>
     <dimen name="margin_small">4dp</dimen>
     <dimen name="margin_large">16dp</dimen>
+    <dimen name="margin_extra_large">32dp</dimen>
     <!-- PADDING -->
     <dimen name="padding_left">16dp</dimen>
+    <dimen name="padding_top">20dp</dimen>
+    <dimen name="padding_top_trailer">26dp</dimen>
+    <dimen name="padding_bottom">20dp</dimen>
+    <dimen name="padding_right_detail">32dp</dimen>
+    <dimen name="padding_button">8dp</dimen>
     <!-- OTHERS -->
     <dimen name="height_title">130dp</dimen>
     <dimen name="width_poster_thumbnail">200dp</dimen>
+    <dimen name="height_poster_thumbnail">200dp</dimen>
+    <dimen name="width_zero">0dp</dimen>
+    <dimen name="gradient_normal">5dp</dimen>
+    <dimen name="line">1dp</dimen>
+    <dimen name="height_title_land">100dp</dimen>
+    <dimen name="play_icon">75dp</dimen>
+
 </resources>

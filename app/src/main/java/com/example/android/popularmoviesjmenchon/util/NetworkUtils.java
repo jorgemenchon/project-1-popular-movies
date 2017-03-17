@@ -11,6 +11,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 /**
  * Class which allows you to search information about movies on the internet
  */
@@ -19,12 +23,16 @@ public class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
-    private static final String BASE_URL = "http://api.themoviedb.org/3";
-    private static final String ENDPOINT_POPULAR = "/movie/popular";
-    private static final String ENDPOINT_TOP_RATED = "/movie/top_rated";
+    private static final String BASE_URL = "http://api.themoviedb.org/3/movie";
+    private static final String ENDPOINT_POPULAR = "/popular";
+    private static final String ENDPOINT_VIDEOS = "/videos";
+    private static final String ENDPOINT_REVIEWS = "/reviews";
+    private static final String ENDPOINT_TOP_RATED = "/top_rated";
     private static final String BASE_URL_IMAGES = "http://image.tmdb.org/t/p/";
     private static final String SIZE_IMAGE = "w";
     private static final String API_PARAM = "api_key";
+
+    private static final OkHttpClient client = new OkHttpClient();
 
 
     public static URL buildUrl(String location) {
@@ -40,22 +48,29 @@ public class NetworkUtils {
         return url;
     }
 
+    /*
+    Method using library Okhttp. More info:http://square.github.io/okhttp/
+    We could use Retrofit or volley: http://vickychijwani.me/retrofit-vs-volley/
+    http://www.vogella.com/tutorials/Retrofit/article.html
+    http://www.androidhive.info/2014/05/android-working-with-volley-library-1/
+     */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        return getResponse(request);
+    }
 
-            boolean hasInput = scanner.hasNext();
-            if (hasInput) {
-                return scanner.next();
-            } else {
-                return null;
-            }
-        } finally {
-            urlConnection.disconnect();
-        }
+    public static String getResponseFromHttpUrl(String url) throws IOException {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        return getResponse(request);
+    }
+
+    private static String getResponse(Request request) throws IOException {
+        Response response = client.newCall(request).execute();
+        return response.body().string();
     }
 
     public static String getMoviePosterUrl(Integer size, String idPoster) {
@@ -68,6 +83,7 @@ public class NetworkUtils {
         return finalUrl;
     }
 
+    // TODO change to get**Location
     public static String getPopularMoviesUrl() {
         return BASE_URL + ENDPOINT_POPULAR;
     }
@@ -76,6 +92,12 @@ public class NetworkUtils {
         return BASE_URL + ENDPOINT_TOP_RATED;
     }
 
+    public static String getTrailersUrl(String id) {
+        return BASE_URL + "/" + id + ENDPOINT_VIDEOS;
+    }
+    public static String getReviewsUrl(String id) {
+        return BASE_URL + "/" + id + ENDPOINT_REVIEWS;
+    }
     /* Check if the url is correct private static boolean isCorrect(String url) {
         Pattern pattern = Pattern.compile(BASE_URL_IMAGES + SIZE_IMAGE + "\\d+" + "//" + ".+");
         Matcher matcher = pattern.matcher(url);

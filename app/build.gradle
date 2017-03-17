@@ -36,5 +36,12 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:recyclerview-v7:25.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
+    compile 'com.jakewharton:butterknife:8.5.1'
+    //To cut down all the extra boilerplate:
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
+    //Animations for recyclerview
+    compile 'jp.wasabeef:recyclerview-animators:2.2.3'
 
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }
