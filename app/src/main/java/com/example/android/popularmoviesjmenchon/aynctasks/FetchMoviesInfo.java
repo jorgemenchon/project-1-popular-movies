@@ -47,7 +47,6 @@ public class FetchMoviesInfo extends AsyncTask<String, Void, List<Movie>> {
             return moviesData;
 
         } catch (Exception e) {
-            e.printStackTrace();
             Log.e(TAG, "Error trying to access to the info.");
             return null;
         }

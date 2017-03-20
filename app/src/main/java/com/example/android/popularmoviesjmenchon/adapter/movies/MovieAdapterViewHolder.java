@@ -4,15 +4,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.view.View.OnClickListener;
+
 import com.example.android.popularmoviesjmenchon.R;
 import com.example.android.popularmoviesjmenchon.model.Movie;
 
 
 public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
 
-    // @BindView(R.id.iv_poster)
     ImageView posterView;
-    // TODO Do we only want poster path?
     Movie movie;
     ListItemClickListener mOnClickListener;
 

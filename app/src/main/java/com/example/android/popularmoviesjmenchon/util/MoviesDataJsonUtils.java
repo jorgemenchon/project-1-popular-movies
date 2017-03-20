@@ -68,7 +68,7 @@ public final class MoviesDataJsonUtils {
             String key = trailer.getString(GeneralUtils.KEY);
             String name = trailer.getString(GeneralUtils.NAME);
 
-            // Creating movie object
+            // Creating trailer object
             Trailer trailerData = new Trailer(key, name);
             trailers.add(trailerData);
         }

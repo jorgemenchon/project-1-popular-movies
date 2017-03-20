@@ -13,7 +13,6 @@ import com.example.android.popularmoviesjmenchon.model.Trailer;
 
 public class ReviewAdapterViewHolder extends RecyclerView.ViewHolder {
 
-    // @BindView(R.id.iv_poster)
     TextView reviewAutor;
     TextView reviewContent;
     Review review;

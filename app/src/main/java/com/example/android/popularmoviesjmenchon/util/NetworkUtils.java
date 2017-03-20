@@ -83,7 +83,6 @@ public class NetworkUtils {
         return finalUrl;
     }
 
-    // TODO change to get**Location
     public static String getPopularMoviesUrl() {
         return BASE_URL + ENDPOINT_POPULAR;
     }
@@ -95,9 +94,11 @@ public class NetworkUtils {
     public static String getTrailersUrl(String id) {
         return BASE_URL + "/" + id + ENDPOINT_VIDEOS;
     }
+
     public static String getReviewsUrl(String id) {
         return BASE_URL + "/" + id + ENDPOINT_REVIEWS;
     }
+
     /* Check if the url is correct private static boolean isCorrect(String url) {
         Pattern pattern = Pattern.compile(BASE_URL_IMAGES + SIZE_IMAGE + "\\d+" + "//" + ".+");
         Matcher matcher = pattern.matcher(url);

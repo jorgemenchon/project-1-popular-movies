@@ -34,33 +34,19 @@ import com.example.android.popularmoviesjmenchon.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 
-/**
- * This CustomCursorAdapter creates and binds ViewHolders, that hold the description and priority of a task,
- * to a RecyclerView to efficiently display data.
- */
 public class CustomCursorAdapter extends RecyclerView.Adapter<MovieAdapterViewHolder> {
 
-    // Class variables for the Cursor that holds task data and the Context
     private Cursor mCursor;
     private Context mContext;
     private final ListItemClickListener mOnClickListener;
 
 
-    /**
-     * Constructor for the CustomCursorAdapter that initializes the Context.
-     *
-     * @param mContext the current Context
-     */
     public CustomCursorAdapter(Context mContext, ListItemClickListener mOnClickListener) {
         this.mContext = mContext;
         this.mOnClickListener = mOnClickListener;
     }
 
-    /**
-     * Called when ViewHolders are created to fill a RecyclerView.
-     *
-     * @return A new TaskViewHolder that holds the view for each task
-     */
+
     @Override
     public MovieAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -73,16 +59,9 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<MovieAdapterViewHo
     }
 
 
-    /**
-     * Called by the RecyclerView to display data at a specified position in the Cursor.
-     *
-     * @param holder   The ViewHolder to bind Cursor data to
-     * @param position The position of the data in the Cursor
-     */
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
 
-        // Indices for the _id, description, and priority columns
         int idIndex = mCursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_ID);
         int posterPathIndex = mCursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_PATH);
         int originalTitleIndex = mCursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_ORIGINAL_TITLE);
@@ -90,8 +69,8 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<MovieAdapterViewHo
         int releaseDateIndex = mCursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE);
         int voteIndex = mCursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE);
 
-        mCursor.moveToPosition(position); // get to the right location in the cursor
-        // Determine the values of the wanted data
+        mCursor.moveToPosition(position);
+
         final int id = mCursor.getInt(idIndex);
         String posterPath = mCursor.getString(posterPathIndex);
         String originalTitle = mCursor.getString(originalTitleIndex);
@@ -111,9 +90,6 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<MovieAdapterViewHo
     }
 
 
-    /**
-     * Returns the number of items to display.
-     */
     @Override
     public int getItemCount() {
         if (mCursor == null) {
@@ -122,24 +98,21 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<MovieAdapterViewHo
         return mCursor.getCount();
     }
 
-
-    /**
-     * When data changes and a re-query occurs, this function swaps the old Cursor
-     * with a newly updated Cursor (Cursor c) that is passed in.
-     */
     public Cursor swapCursor(Cursor c) {
-        // check if this cursor is the same as the previous cursor (mCursor)
         if (mCursor == c) {
-            return null; // bc nothing has changed
+            return null;
         }
         Cursor temp = mCursor;
-        this.mCursor = c; // new cursor value assigned
+        this.mCursor = c;
 
-        //check if this is a valid cursor, then update the cursor
         if (c != null) {
             this.notifyDataSetChanged();
         }
         return temp;
+    }
+
+    public Cursor getCursor() {
+        return mCursor;
     }
 
 }

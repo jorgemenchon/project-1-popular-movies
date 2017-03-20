@@ -19,7 +19,7 @@ import java.util.List;
  */
 
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapterViewHolder> {
-    //ArrayAdapter<Movie> {
+
 
     private static final String TAG = MovieAdapter.class.getSimpleName();
 
@@ -65,13 +65,6 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapterViewHolde
         return listTrailers.size();
     }
 
-    /**
-     * This method is used to set the weather forecast on a ForecastAdapter if we've already
-     * created one. This is handy when we get new data from the web but don't want to create a
-     * new ForecastAdapter to display it.
-     *
-     * @param listTrailers The new listTrailers data to be displayed.
-     */
     public void setListTrailers(List<Trailer> listTrailers) {
         this.listTrailers = listTrailers;
         notifyDataSetChanged();

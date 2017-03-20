@@ -47,7 +47,6 @@ public class FetchReviews extends AsyncTask<String, Void, List<Review>> {
             return reviewsData;
 
         } catch (Exception e) {
-            e.printStackTrace();
             Log.e(TAG, "Error trying to access to the info.");
             return null;
         }

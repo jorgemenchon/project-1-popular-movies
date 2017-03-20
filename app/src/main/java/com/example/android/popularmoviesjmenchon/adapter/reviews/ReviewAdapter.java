@@ -18,7 +18,6 @@ import java.util.ArrayList;
  */
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapterViewHolder> {
-    //ArrayAdapter<Movie> {
 
     private static final String TAG = MovieAdapter.class.getSimpleName();
 
@@ -64,13 +63,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapterViewHolder>
         return listReviews.size();
     }
 
-    /**
-     * This method is used to set the weather forecast on a ForecastAdapter if we've already
-     * created one. This is handy when we get new data from the web but don't want to create a
-     * new ForecastAdapter to display it.
-     *
-     * @param listReviews The new listReviews data to be displayed.
-     */
     public void setListReviews(ArrayList<Review> listReviews) {
         this.listReviews = listReviews;
         notifyDataSetChanged();

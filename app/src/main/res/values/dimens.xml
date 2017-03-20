@@ -29,5 +29,7 @@
     <dimen name="line">1dp</dimen>
     <dimen name="height_title_land">100dp</dimen>
     <dimen name="play_icon">75dp</dimen>
+    <dimen name="min_height">130dp</dimen>
+
 
 </resources>

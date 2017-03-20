@@ -2,14 +2,22 @@
     <string name="app_name">Popular Movies</string>
     <string name="activity_detail_name">Movie Detail</string>
     <string name="error_message">An error has occurred. Test your connection.</string>
-    <string name="no_reviews_message">No reviews available yet</string>
+    <string name="no_reviews_message">No reviews available</string>
+    <string name="no_trailers_message">No trailers available</string>
     <string name="action_popular">Most Popular</string>
     <string name="action_rated">Top Rated</string>
-    <string name="test_text">Test text</string>
+    <string name="add_without_error">Movie added to favourites</string>
+    <string name="add_with_error">Cannot added movie to favourites</string>
+    <string name="remove_without_error">Movie removed from favourites</string>
+    <string name="remove_with_error">Cannot removed movie from favourites</string>
     <string name="action_favourites">Favourites</string>
     <string name="button_remove_favourite">Remove from favourites</string>
     <string name="button_favourite">Mark as favourite</string>
     <string name="tv_reviews">Reviews:</string>
     <string name="tv_trailers">Trailers:</string>
+    <string name="favourites_title">Favourites</string>
+    <string name="top_rated_title">Top Rated</string>
+    <string name="popular_title">Popular</string>
+
 
 </resources>

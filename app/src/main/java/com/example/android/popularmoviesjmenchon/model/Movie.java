@@ -2,7 +2,7 @@ package com.example.android.popularmoviesjmenchon.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-// DONE Movie must implement Parcelable interface
+
 public class Movie implements Parcelable {
 
     private String results;
@@ -10,7 +10,7 @@ public class Movie implements Parcelable {
     private String adult;
     private String overview;
     private String releaseDate;
-    private String genreIds;// For project 2:  array[integer]
+    private String genreIds;
     private String id;
     private String originalTitle;
     private String originalLanguage;

@@ -35,10 +35,11 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 
 public class ListMovies extends AppCompatActivity implements ListItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String MOVIES_SAVED = "moviesSaved";
+    public static final int MOVIE_LOADER_ID = 0;
 
     private MovieAdapter movieAdapter;
     private CustomCursorAdapter favouriteMoviesAdapter;
@@ -49,9 +50,7 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
     ProgressBar loadingMovies;
     @BindView(R.id.tv_message_error)
     TextView messageError;
-    private final String MOVIES_SAVED = "moviesSaved";
-    private final int DURATION_EFECT_ADAPTER_MILI = 1000;
-    public static final int MOVIE_LOADER_ID = 0;
+
 
     private static final String TAG = ListMovies.class.getSimpleName();
 
@@ -61,30 +60,24 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
         setContentView(R.layout.list_movies);
         // Find all components
         ButterKnife.bind(this);
-        //LinearLayoutManager can support HORIZONTAL or VERTICAL orientations.
         GridLayoutManager layoutManager
                 = new GridLayoutManager(this, GeneralUtils.NUM_COLUM, GridLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
-        //Use this setting to improve performance if you know that changes in content do not
-        // change the child layout size in the RecyclerView
         mRecyclerView.setHasFixedSize(true);
         movieAdapter = new MovieAdapter(this, this);
         favouriteMoviesAdapter = new CustomCursorAdapter(this, this);
 
-        AlphaInAnimationAdapter movieAdapterWithAnimation = new AlphaInAnimationAdapter(movieAdapter);
-        //Disabling the first scroll mode.
-        movieAdapterWithAnimation.setFirstOnly(false);
-        movieAdapterWithAnimation.setDuration(DURATION_EFECT_ADAPTER_MILI);
-        //https://github.com/wasabeef/recyclerview-animators
-        mRecyclerView.setAdapter(movieAdapterWithAnimation);
-
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIES_SAVED)) {
-            showMoviesPosters();
-            ArrayList<Movie> moviesData = savedInstanceState.getParcelableArrayList(MOVIES_SAVED);
-            movieAdapter.setListMovies(moviesData);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(MOVIES_SAVED)) {
+                showMoviesPosters();
+                ArrayList<Movie> moviesData = savedInstanceState.getParcelableArrayList(MOVIES_SAVED);
+                movieAdapter.setListMovies(moviesData);
+                mRecyclerView.setAdapter(movieAdapter);
+            } else {
+                mRecyclerView.setAdapter(favouriteMoviesAdapter);
+            }
         } else {
             loadFavouriteMovies();
-            // loadFavouriteMovies();
         }
 
     }
@@ -126,16 +119,21 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
     }
 
     private void loadFavouriteMovies() {
-            mRecyclerView.setAdapter(favouriteMoviesAdapter);
-            getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
-
+        String title = getString(R.string.app_name) + " (" + getString(R.string.favourites_title) + ")";
+        setTitle(title);
+        mRecyclerView.setAdapter(favouriteMoviesAdapter);
+        getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
     }
 
     private void loadTopRatedMoviesData() {
+        String title = getString(R.string.app_name) + " (" + getString(R.string.top_rated_title) + ")";
+        setTitle(title);
         loadMoviesData(NetworkUtils.getTopRatedMoviesUrl());
     }
 
     private void loadMostPopularMoviesData() {
+        String title = getString(R.string.app_name) + " (" + getString(R.string.popular_title) + ")";
+        setTitle(title);
         loadMoviesData(NetworkUtils.getPopularMoviesUrl());
     }
 
@@ -155,6 +153,94 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
         inflater.inflate(R.menu.movies, menu);
         return true;
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ArrayList<Movie> moviesData = movieAdapter.getListMovies();
+        if (!UtilFunctions.isEmpty(moviesData)) {
+            outState.putParcelableArrayList(MOVIES_SAVED, moviesData);
+        }
+        //In other case it means that we are viewing favourites and we don´t need to send anything. Loader
+    }
+
+    /*----------------------------------- FETCH FROM API --------------------------*/
+
+    public class FetchMoviesTaskCompleteListener implements AsyncTaskCompleteListener<ArrayList<Movie>> {
+        @Override
+        public void onPreExecute() {
+            showLoaderMovies();
+        }
+
+        @Override
+        public void onTaskComplete(ArrayList<Movie> moviesData) {
+            if (moviesData != null && moviesData.size() > 0) {
+                showMoviesPosters();
+                movieAdapter.setListMovies(moviesData);
+            } else {
+                showMessageError();
+            }
+        }
+    }
+
+    /*------------------------------------ FETCH FROM DB ------------------------*/
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, final Bundle loaderArgs) {
+
+        return new AsyncTaskLoader<Cursor>(this) {
+            Cursor mMovieData = null;
+
+            @Override
+            protected void onStartLoading() {
+                if (mMovieData != null) {
+                    deliverResult(mMovieData);
+                } else {
+                    forceLoad();
+                }
+            }
+
+            @Override
+            public Cursor loadInBackground() {
+                try {
+                    return getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI_MOVIES,
+                            null,
+                            null,
+                            null,
+                            MoviesContract.MovieEntry.COLUMN_ID);
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to asynchronously load data.");
+                    return null;
+                }
+            }
+
+            public void deliverResult(Cursor data) {
+                mMovieData = data;
+                super.deliverResult(data);
+            }
+        };
+
+    }
+
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        favouriteMoviesAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        favouriteMoviesAdapter.swapCursor(null);
+    }
+
+
+    /*--------- UTIL METHODS ---------------*/
 
     private boolean isOnline() {
         ConnectivityManager cm =
@@ -180,126 +266,4 @@ public class ListMovies extends AppCompatActivity implements ListItemClickListen
         mRecyclerView.setVisibility(View.INVISIBLE);
         messageError.setVisibility(View.VISIBLE);
     }
-
-
-    public class FetchMoviesTaskCompleteListener implements AsyncTaskCompleteListener<ArrayList<Movie>> {
-        @Override
-        public void onPreExecute() {
-            showLoaderMovies();
-        }
-
-        @Override
-        public void onTaskComplete(ArrayList<Movie> moviesData) {
-            if (moviesData != null && moviesData.size() > 0) {
-                showMoviesPosters();
-                movieAdapter.setListMovies(moviesData);
-            } else {
-                showMessageError();
-            }
-        }
-    }
-
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        ArrayList<Movie> moviesData = movieAdapter.getListMovies();
-        outState.putParcelableArrayList(MOVIES_SAVED, moviesData);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // re-queries for all tasks
-        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
-    }
-
-
-    /**
-     * Instantiates and returns a new AsyncTaskLoader with the given ID.
-     * This loader will return task data as a Cursor or null if an error occurs.
-     * <p>
-     * Implements the required callbacks to take care of loading data at all stages of loading.
-     */
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, final Bundle loaderArgs) {
-
-        return new AsyncTaskLoader<Cursor>(this) {
-
-            // Initialize a Cursor, this will hold all the task data
-            Cursor mMovieData = null;
-
-            // onStartLoading() is called when a loader first starts loading data
-            @Override
-            protected void onStartLoading() {
-                if (mMovieData != null) {
-                    // Delivers any previously loaded data immediately
-                    deliverResult(mMovieData);
-                } else {
-                    // Force a new load
-                    forceLoad();
-                }
-            }
-
-            // loadInBackground() performs asynchronous loading of data
-            @Override
-            public Cursor loadInBackground() {
-                // Will implement to load data
-
-                // Query and load all task data in the background; sort by id
-                // [Hint] use a try/catch block to catch any errors in loading data
-
-                try {
-                    return getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI_MOVIES,
-                            null,
-                            null,
-                            null,
-                            MoviesContract.MovieEntry.COLUMN_ID);
-
-                } catch (Exception e) {
-                    Log.e(TAG, "Failed to asynchronously load data.");
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-
-            // deliverResult sends the result of the load, a Cursor, to the registered listener
-            public void deliverResult(Cursor data) {
-                mMovieData = data;
-                super.deliverResult(data);
-            }
-        };
-
-    }
-
-
-    /**
-     * Called when a previously created loader has finished its load.
-     *
-     * @param loader The Loader that has finished.
-     * @param data   The data generated by the Loader.
-     */
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // Update the data that the adapter uses to create ViewHolders
-        showMoviesPosters();
-        favouriteMoviesAdapter.swapCursor(data);
-
-    }
-
-
-    /**
-     * Called when a previously created loader is being reset, and thus
-     * making its data unavailable.
-     * onLoaderReset removes any references this activity had to the loader's data.
-     *
-     * @param loader The Loader that is being reset.
-     */
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        favouriteMoviesAdapter.swapCursor(null);
-    }
-
-
 }

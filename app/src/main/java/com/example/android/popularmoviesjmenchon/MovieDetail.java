@@ -3,7 +3,10 @@ package com.example.android.popularmoviesjmenchon;
 
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.ActionBar;
 import android.content.Intent;
@@ -12,10 +15,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,10 +36,7 @@ import com.example.android.popularmoviesjmenchon.model.Review;
 import com.example.android.popularmoviesjmenchon.model.Trailer;
 import com.example.android.popularmoviesjmenchon.util.GeneralUtils;
 import com.example.android.popularmoviesjmenchon.util.NetworkUtils;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.example.android.popularmoviesjmenchon.util.UtilFunctions;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -43,12 +45,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 
 public class MovieDetail extends AppCompatActivity implements ListItemTrailerClickListener {
 
-    private String id;
-    private String path;
+    private static final String TAG = MovieDetail.class.getSimpleName();
+    public static final String URI_YOUTUBE_OPTIONS = "ytpl://";
 
     @BindView(R.id.tv_original_title)
     TextView mOriginalTitle;
@@ -66,19 +67,20 @@ public class MovieDetail extends AppCompatActivity implements ListItemTrailerCli
     RecyclerView reviews;
     @BindView(R.id.tv_no_reviews)
     TextView noReviewsMessage;
+    @BindView(R.id.tv_no_trailers)
+    TextView noTrailersMessage;
     @BindView(R.id.b_favourite)
     Button buttonFavourite;
-    @BindView(R.id.b_unfavourite)
-    Button buttonUnfavourite;
+    @BindView(R.id.b_removefavourite)
+    Button buttonRemoveFavourite;
+    @BindView(R.id.pb_loading_reviews)
+    ProgressBar loadingTrailers;
+    @BindView(R.id.pb_loading_trailers)
+    ProgressBar loadingReviews;
 
-
+    Movie movie;
     TrailerAdapter trailersAdapter;
     ReviewAdapter reviewsAdapter;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +91,7 @@ public class MovieDetail extends AppCompatActivity implements ListItemTrailerCli
         // Get an intent which runs this activity
         Intent intent = getIntent();
         if (intent.hasExtra(GeneralUtils.INTENTS_MOVIE)) {
-            Movie movie = intent.getParcelableExtra(GeneralUtils.INTENTS_MOVIE);
+            movie = intent.getParcelableExtra(GeneralUtils.INTENTS_MOVIE);
             initializeMovieDetails(movie);
             loadFavouriteButtons(movie.getId());
         }
@@ -102,47 +104,31 @@ public class MovieDetail extends AppCompatActivity implements ListItemTrailerCli
                 = new GridLayoutManager(this, 1, GridLayoutManager.VERTICAL, false);
 
         trailers.setLayoutManager(layoutManager);
-        //Use this setting to improve performance if you know that changes in content do not
-        // change the child layout size in the RecyclerView
         trailers.setHasFixedSize(true);
-
+        trailers.setNestedScrollingEnabled(false);
         trailersAdapter = new TrailerAdapter(this, this);
-
-        AlphaInAnimationAdapter movieAdapterWithAnimation = new AlphaInAnimationAdapter(trailersAdapter);
-        //Disabling the first scroll mode.
-        movieAdapterWithAnimation.setFirstOnly(false);
-        //movieAdapterWithAnimation.setDuration(DURATION_EFECT_ADAPTER_MILI);
-        //https://github.com/wasabeef/recyclerview-animators
-        trailers.setAdapter(movieAdapterWithAnimation);
+        trailers.setAdapter(trailersAdapter);
 
 
         GridLayoutManager layoutManagerReviews
                 = new GridLayoutManager(this, 1, GridLayoutManager.VERTICAL, false);
         reviews.setLayoutManager(layoutManagerReviews);
-        //Use this setting to improve performance if you know that changes in content do not
-        // change the child layout size in the RecyclerView
         reviews.setHasFixedSize(true);
-        // This disable the scroll
         reviews.setNestedScrollingEnabled(false);
-
         reviewsAdapter = new ReviewAdapter(this);
         reviews.setAdapter(reviewsAdapter);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
     }
 
     private void loadFavouriteButtons(String idMovie) {
         if (isMovieAmongFavourites(idMovie)) {
             buttonFavourite.setVisibility(View.INVISIBLE);
-            buttonUnfavourite.setVisibility(View.VISIBLE);
+            buttonRemoveFavourite.setVisibility(View.VISIBLE);
         } else {
             buttonFavourite.setVisibility(View.VISIBLE);
-            buttonUnfavourite.setVisibility(View.INVISIBLE);
+            buttonRemoveFavourite.setVisibility(View.INVISIBLE);
         }
     }
-
 
     private boolean isMovieAmongFavourites(String idMovie) {
         Uri uri = MoviesContract.MovieEntry.CONTENT_URI_MOVIES;
@@ -165,11 +151,10 @@ public class MovieDetail extends AppCompatActivity implements ListItemTrailerCli
         String average = movie.getVoteAverage();
         String averageComplete = average + GeneralUtils.AVERAGE_TOTAL;
         String releaseDate = movie.getReleaseDate();
-        //String id = movie.getId();
-        id = movie.getId();
-        path = movie.getPosterPath();
-        getTrailersFromMovieId(id);
-        getReviewsFromMovieId(id);
+        String idMovie = movie.getId();
+        String path = movie.getPosterPath();
+        getTrailersFromMovieId(idMovie);
+        getReviewsFromMovieId(idMovie);
 
         this.mOriginalTitle.setText(originalTitle);
         this.mOverview.setText(overview);
@@ -191,149 +176,147 @@ public class MovieDetail extends AppCompatActivity implements ListItemTrailerCli
     }
 
 
-    private void getTrailersFromMovieId(String id) {
-        String location = NetworkUtils.getTrailersUrl(id);
-        URL buildRequestUrl = NetworkUtils.buildUrl(location);
-
-        FetchTrailers fetcher = new FetchTrailers(this, new FetchTrailersTaskCompleteListener());
-        fetcher.execute(location);
-    }
-
-
-    private void getReviewsFromMovieId(String id) {
-        String location = NetworkUtils.getReviewsUrl(id);
-        URL buildRequestUrl = NetworkUtils.buildUrl(location);
-
-        FetchReviews fetcher = new FetchReviews(this, new FetchReviewsTaskCompleteListener());
-        fetcher.execute(location);
-    }
-
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("MovieDetail Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
-    }
-
-
-    // Fetch trailers
-    public class FetchTrailersTaskCompleteListener implements AsyncTaskCompleteListener<List<Trailer>> {
-        @Override
-        public void onPreExecute() {
-            //TODO do something
-        }
-
-        @Override
-        public void onTaskComplete(List<Trailer> trailersData) {
-            if (trailersData != null && trailersData.size() > 0) {
-                //  showMoviesPosters();
-                trailersAdapter.setListTrailers(trailersData);
-            } else {
-                // showMessageError();
-            }
-        }
-    }
-
-    //Fetch reviews
-
-    public class FetchReviewsTaskCompleteListener implements AsyncTaskCompleteListener<ArrayList<Review>> {
-        @Override
-        public void onPreExecute() {
-            //TODO do something
-        }
-
-        @Override
-        public void onTaskComplete(ArrayList<Review> reviewsData) {
-            if (reviewsData != null && reviewsData.size() > 0) {
-                //  showMoviesPosters();
-                reviewsAdapter.setListReviews(reviewsData);
-            } else {
-                // showMessageError();
-                noReviewsMessage.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
     private void openYoutube(String keyTrailer) {
-        //    Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("ytpl://" + keyTrailer));
-        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + keyTrailer));
+        Intent optionIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(URI_YOUTUBE_OPTIONS + keyTrailer));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
-                Uri.parse("http://www.youtube.com/watch?v=" + keyTrailer));
+                Uri.parse(GeneralUtils.YOUTUBE_URL + keyTrailer));
         try {
-            startActivity(appIntent);
+            startActivity(optionIntent);
         } catch (ActivityNotFoundException e) {
-            e.printStackTrace();
+            Log.v(TAG, "Cannot open an application. Tying to open web browser");
             startActivity(webIntent);
         }
     }
 
 
+    public void onClickAddFavouriteMovie(View view) {
+        ContentValues contentValues = UtilFunctions.getContentValuesFromMovie(movie);
+        Uri uri = getContentResolver().insert(MoviesContract.MovieEntry.CONTENT_URI_MOVIES, contentValues);
+        if (uri != null) {
+            Toast.makeText(getBaseContext(), getString(R.string.add_without_error), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getBaseContext(), getString(R.string.add_with_error), Toast.LENGTH_SHORT).show();
+        }
+        loadFavouriteButtons(movie.getId());
+    }
+
+    public void onClickRemoveFromFavouriteMovie(View view) {
+        String stringId = movie.getId();
+        Uri uri = MoviesContract.MovieEntry.CONTENT_URI_MOVIES;
+        uri = uri.buildUpon().appendPath(stringId).build();
+        getContentResolver().delete(uri, null, null);
+        if (uri != null) {
+            Toast.makeText(getBaseContext(), getString(R.string.remove_without_error), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getBaseContext(), getString(R.string.remove_with_error), Toast.LENGTH_SHORT).show();
+        }
+        loadFavouriteButtons(movie.getId());
+    }
+
+    private boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    /*------------------- TRAILERS -----------------*/
     @Override
     public void onListItemClick(Trailer trailer) {
         openYoutube(trailer.getKey());
     }
 
-    public void onClickAddFavouriteMovie(View view) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_ID, id);
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_ORIGINAL_TITLE, mOriginalTitle.getText().toString());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, mOverview.getText().toString());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_POSTER_PATH, path);
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, mReleaseDate.getText().toString());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, mRating.getText().toString());
-
-        Uri uri = getContentResolver().insert(MoviesContract.MovieEntry.CONTENT_URI_MOVIES, contentValues);
-        if (uri != null) {
-            Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_SHORT).show();
+    private void getTrailersFromMovieId(String id) {
+        if (isOnline()) {
+            String location = NetworkUtils.getTrailersUrl(id);
+            FetchTrailers fetcher = new FetchTrailers(this, new FetchTrailersTaskCompleteListener());
+            fetcher.execute(location);
+        } else {
+            showMessageErrorTrailers();
         }
-        loadFavouriteButtons(id);
-       // finish();
-
     }
 
-    public void onClickUnfavouriteMovie(View view) {
-        // Build appropriate uri with String row id appended
-        String stringId = id;
-        Uri uri = MoviesContract.MovieEntry.CONTENT_URI_MOVIES;
-        uri = uri.buildUpon().appendPath(stringId).build();
-
-        // COMPLETED (2) Delete a single row of data using a ContentResolver
-        getContentResolver().delete(uri, null, null);
-        if (uri != null) {
-            Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_SHORT).show();
+    public class FetchTrailersTaskCompleteListener implements AsyncTaskCompleteListener<List<Trailer>> {
+        @Override
+        public void onPreExecute() {
+            showLoaderTrailers();
         }
-        loadFavouriteButtons(id);
-        // COMPLETED (3) Restart the loader to re-query for all tasks after a deletion
-        // getSupportLoaderManager().restartLoader(ListMovies.MOVIE_LOADER_IDnull, ListMovies.this);
-        // o, nRestart();
+
+        @Override
+        public void onTaskComplete(List<Trailer> trailersData) {
+            if (trailersData != null && trailersData.size() > 0) {
+                showMoviesTrailers();
+                trailersAdapter.setListTrailers(trailersData);
+            } else {
+                showMessageErrorTrailers();
+            }
+        }
     }
+
+    private void showLoaderTrailers() {
+        loadingTrailers.setVisibility(View.VISIBLE);
+        trailers.setVisibility(View.INVISIBLE);
+        noTrailersMessage.setVisibility(View.INVISIBLE);
+    }
+
+    private void showMoviesTrailers() {
+        loadingTrailers.setVisibility(View.INVISIBLE);
+        trailers.setVisibility(View.VISIBLE);
+        noTrailersMessage.setVisibility(View.INVISIBLE);
+    }
+
+    private void showMessageErrorTrailers() {
+        loadingTrailers.setVisibility(View.INVISIBLE);
+        trailers.setVisibility(View.INVISIBLE);
+        noTrailersMessage.setVisibility(View.VISIBLE);
+    }
+
+
+    /*----------------REVIEWS ----------------*/
+
+    private void getReviewsFromMovieId(String id) {
+        if (isOnline()) {
+            String location = NetworkUtils.getReviewsUrl(id);
+            FetchReviews fetcher = new FetchReviews(this, new FetchReviewsTaskCompleteListener());
+            fetcher.execute(location);
+        } else {
+            showMessageErrorReviews();
+        }
+    }
+
+    public class FetchReviewsTaskCompleteListener implements AsyncTaskCompleteListener<ArrayList<Review>> {
+        @Override
+        public void onPreExecute() {
+            showLoaderReviews();
+        }
+
+        @Override
+        public void onTaskComplete(ArrayList<Review> reviewsData) {
+            if (reviewsData != null && reviewsData.size() > 0) {
+                showMoviesReviews();
+                reviewsAdapter.setListReviews(reviewsData);
+            } else {
+                showMessageErrorReviews();
+            }
+        }
+    }
+
+    private void showLoaderReviews() {
+        loadingReviews.setVisibility(View.VISIBLE);
+        reviews.setVisibility(View.INVISIBLE);
+        noReviewsMessage.setVisibility(View.INVISIBLE);
+    }
+
+    private void showMoviesReviews() {
+        loadingReviews.setVisibility(View.INVISIBLE);
+        reviews.setVisibility(View.VISIBLE);
+        noReviewsMessage.setVisibility(View.INVISIBLE);
+    }
+
+    private void showMessageErrorReviews() {
+        loadingReviews.setVisibility(View.INVISIBLE);
+        reviews.setVisibility(View.INVISIBLE);
+        noReviewsMessage.setVisibility(View.VISIBLE);
+    }
+
 }

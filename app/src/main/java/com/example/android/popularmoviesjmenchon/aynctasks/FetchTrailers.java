@@ -53,7 +53,6 @@ public class FetchTrailers extends AsyncTask<String, Void, List<Trailer>> {
             return trailersSubList;
 
         } catch (Exception e) {
-            e.printStackTrace();
             Log.e(TAG, "Error trying to access to the info.");
             return null;
         }

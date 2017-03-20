@@ -28,7 +28,6 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-// TODO (1) Verify that TaskContentProvider extends from ContentProvider and implements required methods
 public class MovieContentProvider extends ContentProvider {
 
 
@@ -45,18 +44,12 @@ public class MovieContentProvider extends ContentProvider {
         return uriMatcher;
     }
 
-    /* onCreate() is where you should initialize anything you’ll need to setup
-    your underlying data source.
-    In this case, you’re working with a SQLite database, so you’ll need to
-    initialize a DbHelper to gain access to it.
-     */
     @Override
     public boolean onCreate() {
         Context context = getContext();
         mMovieDbHelper = new MovieDbHelper(context);
         return false;
     }
-
 
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
@@ -129,38 +122,27 @@ public class MovieContentProvider extends ContentProvider {
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
 
-        // Get access to the database and write URI matching code to recognize a single item
         final SQLiteDatabase db = mMovieDbHelper.getWritableDatabase();
 
         int match = sUriMather.match(uri);
-        // Keep track of the number of deleted tasks
-        int tasksDeleted; // starts as 0
+        int moviesDeleted;
 
-        // Write the code to delete a single row of data
-        // [Hint] Use selections to delete an item by its row ID
         switch (match) {
-            // Handle the single item case, recognized by the ID included in the URI path
             case MOVIES_WITH_ID:
-                // Get the task ID from the URI path
                 String id = uri.getPathSegments().get(1);
-                // Use selections/selectionArgs to filter for this ID
-                tasksDeleted = db.delete(MoviesContract.MovieEntry.TABLE_NAME, "id=?", new String[]{id});
+                moviesDeleted = db.delete(MoviesContract.MovieEntry.TABLE_NAME, "id=?", new String[]{id});
                 break;
             case MOVIES:
                 // Delete all
-                tasksDeleted = db.delete(MoviesContract.MovieEntry.TABLE_NAME, null, null);
+                moviesDeleted = db.delete(MoviesContract.MovieEntry.TABLE_NAME, null, null);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-
-        // Notify the resolver of a change and return the number of items deleted
-        if (tasksDeleted != 0) {
-            // A task was deleted, set notification
+        if (moviesDeleted != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
-        // Return number of items deleted
-        return tasksDeleted;
+        return moviesDeleted;
     }
 
     @Override

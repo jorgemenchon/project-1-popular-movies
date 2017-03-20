@@ -47,7 +47,7 @@
 
         <TextView
             android:id="@+id/tv_release_date"
-            android:layout_width="0dp"
+            android:layout_width="@dimen/width_zero"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_large"
             android:layout_marginStart="@dimen/margin_large"
@@ -58,7 +58,7 @@
 
         <TextView
             android:id="@+id/tv_rating"
-            android:layout_width="0dp"
+            android:layout_width="@dimen/width_zero"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_large"
             android:layout_marginStart="@dimen/margin_large"
@@ -69,7 +69,7 @@
 
         <Button
             android:id="@+id/b_favourite"
-            android:layout_width="0dp"
+            android:layout_width="@dimen/width_zero"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_extra_large"
             android:layout_marginStart="@dimen/margin_extra_large"
@@ -82,15 +82,15 @@
             app:layout_constraintTop_toTopOf="@+id/iv_poster_detail" />
 
         <Button
-            android:id="@+id/b_unfavourite"
-            android:layout_width="0dp"
+            android:id="@+id/b_removefavourite"
+            android:layout_width="@dimen/width_zero"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/margin_extra_large"
             android:layout_marginLeft="@dimen/margin_extra_large"
             android:layout_marginRight="@dimen/margin_extra_large"
             android:layout_marginStart="@dimen/margin_extra_large"
             android:background="@color/colorButton"
-            android:onClick="onClickUnfavouriteMovie"
+            android:onClick="onClickRemoveFromFavouriteMovie"
             android:padding="@dimen/padding_button"
             android:text="@string/button_remove_favourite"
             android:textSize="@dimen/text_size_small"
@@ -100,13 +100,15 @@
 
         <TextView
             android:id="@+id/tv_overview"
-            android:layout_width="396dp"
-            android:layout_height="138dp"
+            android:layout_width="@dimen/overview"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_large"
             android:layout_marginStart="@dimen/margin_large"
             android:layout_marginTop="@dimen/margin_large"
+            android:minHeight="@dimen/min_height"
             android:textSize="@dimen/text_size_small"
             app:layout_constraintLeft_toRightOf="@+id/iv_poster_detail"
+            app:layout_constraintRight_toLeftOf="@+id/tv_trailers"
             app:layout_constraintTop_toBottomOf="@+id/b_favourite"
             tools:text="Overview" />
 
@@ -127,10 +129,35 @@
             android:id="@+id/rv_trailers"
             android:layout_width="@dimen/width_zero"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_large"
             android:layout_marginRight="@dimen/margin_large"
             android:scrollbars="none"
-            app:layout_constraintLeft_toRightOf="@+id/tv_overview"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_trailers"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_trailers" />
+
+        <TextView
+            android:id="@+id/tv_no_trailers"
+            android:layout_width="@dimen/width_zero"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_large"
+            android:layout_marginRight="@dimen/margin_large"
+            android:paddingTop="@dimen/padding_top"
+            android:text="@string/no_trailers_message"
+            android:textSize="@dimen/text_size_small"
+            android:textStyle="italic"
+            android:visibility="invisible"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_trailers"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_trailers"
+            tools:text="No trailers available yet" />
+
+        <ProgressBar
+            android:id="@+id/pb_loading_trailers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="invisible"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_trailers"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_trailers" />
 
@@ -160,16 +187,26 @@
 
         <TextView
             android:id="@+id/tv_no_reviews"
-            android:visibility="invisible"
             android:layout_width="@dimen/width_zero"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_large"
             android:layout_marginRight="@dimen/margin_large"
             android:paddingTop="@dimen/padding_top"
-            tools:text="here is no reviews available yet"
             android:text="@string/no_reviews_message"
             android:textSize="@dimen/text_size_small"
             android:textStyle="italic"
+            android:visibility="invisible"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_reviews"
+            tools:text="here is no reviews available yet" />
+
+        <ProgressBar
+            android:id="@+id/pb_loading_reviews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="invisible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_reviews" />

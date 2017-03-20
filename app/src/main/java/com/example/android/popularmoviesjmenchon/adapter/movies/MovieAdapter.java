@@ -30,9 +30,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-// DONE: Creating and Using a Custom ArrayAdapter
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapterViewHolder> {
-    //ArrayAdapter<Movie> {
 
     private static final String TAG = MovieAdapter.class.getSimpleName();
 
@@ -83,13 +81,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapterViewHolder> {
         return listMovies.size();
     }
 
-    /**
-     * This method is used to set the weather forecast on a ForecastAdapter if we've already
-     * created one. This is handy when we get new data from the web but don't want to create a
-     * new ForecastAdapter to display it.
-     *
-     * @param listMovies The new listMovies data to be displayed.
-     */
     public void setListMovies(ArrayList<Movie> listMovies) {
         this.listMovies = listMovies;
         notifyDataSetChanged();

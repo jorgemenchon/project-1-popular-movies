@@ -30,11 +30,7 @@
         <provider
             android:name="com.example.android.popularmoviesjmenchon.model.MovieContentProvider"
             android:authorities="com.example.android.popularmoviesjmenchon"
-            android:exported="false"></provider><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
-     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+            android:exported="false"></provider>
     </application>
 
 </manifest>

@@ -3,16 +3,20 @@ package com.example.android.popularmoviesjmenchon.adapter.trailers;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.popularmoviesjmenchon.R;
 import com.example.android.popularmoviesjmenchon.model.Trailer;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
 
-    // @BindView(R.id.iv_poster)
     TextView nameTrailer;
+    ImageView iconPlay;
     Trailer trailer;
     ListItemTrailerClickListener mOnClickListener;
 
@@ -20,7 +24,9 @@ public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder implements
         super(view);
         this.mOnClickListener = mOnClickListener;
         nameTrailer = (TextView) view.findViewById(R.id.tv_trailer_name);
+        iconPlay = (ImageView) view.findViewById(R.id.iv_icon_play);
         nameTrailer.setOnClickListener(this);
+        iconPlay.setOnClickListener(this);
     }
 
     @Override
